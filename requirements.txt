@@ -1,0 +1,10 @@
+Flask
+Flask-Cors
+google-generativeai
+faiss-cpu
+sentence-transformers
+nltk
+numpy
+pdfplumber
+tqdm
+python-dotenv
