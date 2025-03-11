@@ -3,6 +3,8 @@ import pdfplumber
 import os
 import logging
 from config import GEMINI_API_KEY
+from database import save_chat_history, fetch_chat_history
+from deep_translator import GoogleTranslator
 
 # ✅ Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -15,19 +17,18 @@ GEMINI_MODEL = "gemini-1.5-flash"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOCS_FOLDER = os.path.join(BASE_DIR, "data", "documents")  # Folder where PDFs are stored
 
-# ✅ Debugging: Check if API key is loaded
+# ✅ Ensure API Key is loaded
 if not GEMINI_API_KEY:
-    raise ValueError("❌ ERROR: GEMINI_API_KEY is missing! Add it in 'config.py' or Render Env Vars.")
+    raise ValueError("❌ ERROR: GEMINI_API_KEY is missing! Add it in '.env' or Render Env Vars.")
 
-print(f"✅ GEMINI_API_KEY Loaded: {GEMINI_API_KEY[:5]}********")  # Hide full key for security
-
-# ✅ Debugging: Print document folder path
-print(f"📁 Checking folder: {DOCS_FOLDER}")
-
-# ✅ Ensure documents folder exists
+# ✅ Ensure document folder exists
 if not os.path.exists(DOCS_FOLDER):
     logging.error(f"❌ ERROR: Documents folder not found: {DOCS_FOLDER}")
     raise FileNotFoundError(f"❌ Documents folder missing: {DOCS_FOLDER}")
+
+# ✅ Translator for Hindi-English support
+translator = GoogleTranslator(source="auto", target="en")
+reverse_translator = GoogleTranslator(source="en", target="auto")
 
 def extract_text_from_pdf(pdf_path):
     """Extract text from a single PDF file."""
@@ -38,24 +39,17 @@ def extract_text_from_pdf(pdf_path):
                 text = page.extract_text()
                 if text:
                     extracted_text.append(text)
-
         return " ".join(extracted_text) if extracted_text else None
-
     except Exception as e:
         logging.error(f"❌ ERROR: Failed to read PDF: {pdf_path} | {e}")
         return None
 
 def load_pdf_context():
     """Load text from the first available PDF in the documents folder."""
-    
-    if not os.path.exists(DOCS_FOLDER):
-        logging.warning(f"⚠️ No 'documents' folder found at {DOCS_FOLDER}.")
-        return "⚠️ No documents available."
-
     pdf_files = [f for f in os.listdir(DOCS_FOLDER) if f.endswith(".pdf")]
 
     if not pdf_files:
-        logging.warning("⚠️ No PDF files found in the 'documents' folder.")
+        logging.warning("⚠️ No PDF files found in 'documents' folder.")
         return "⚠️ No documents available."
 
     # ✅ Select the first PDF file found
@@ -64,35 +58,56 @@ def load_pdf_context():
 
     return extract_text_from_pdf(pdf_path)
 
-def generate_response(user_query):
-    """Generate chatbot response using Gemini AI with PDF context."""
-    
-    # ✅ Load the PDF text
-    pdf_context = load_pdf_context()
-
-    if not pdf_context or "⚠️" in pdf_context:
-        return "⚠️ No documents available for reference."
-
-    # ✅ Construct prompt for Gemini AI
-    prompt = f"""
-    You are an AI assistant that answers questions based on the provided document.
-
-    Document Content:
-    {pdf_context}
-
-    User: {user_query}
-    AI Assistant:
+def generate_response(user_message):
     """
-
+    Generates chatbot responses using Gemini AI with chat history and document context.
+    """
     try:
-        # ✅ Use Google Gemini AI to generate response
+        # ✅ Detect language & translate if needed
+        detected_lang = translator.detect(user_message)
+        if detected_lang != "en":
+            user_message = translator.translate(user_message)
+
+        # ✅ Fetch last 5 messages for chat context
+        chat_history = fetch_chat_history(limit=5)
+        context = "\n".join([f"User: {u}\nBot: {b}" for u, b in chat_history])
+
+        # ✅ Load document context
+        pdf_context = load_pdf_context()
+        if not pdf_context or "⚠️" in pdf_context:
+            pdf_context = "⚠️ No documents available."
+
+        # ✅ Construct prompt for Gemini AI
+        prompt = f"""
+        You are an AI assistant answering questions based on the provided conversation and document.
+
+        Chat History:
+        {context}
+
+        Document Content:
+        {pdf_context}
+
+        User: {user_message}
+        AI Assistant:
+        """
+
+        # ✅ Generate response from Gemini AI
         model = genai.GenerativeModel(GEMINI_MODEL)
         response = model.generate_content([prompt])
+        bot_response = response.text.strip() if response else "⚠️ AI is unavailable."
 
-        return response.text.strip() if response else "⚠️ AI is unavailable."
+        # ✅ Translate back to Hindi if needed
+        if detected_lang != "en":
+            bot_response = reverse_translator.translate(bot_response)
+
+        # ✅ Save chat history to database
+        save_chat_history(user_message, bot_response)
+
+        logging.info(f"User: {user_message} | Bot: {bot_response}")
+        return bot_response
 
     except Exception as e:
-        logging.error(f"❌ ERROR: Gemini API request failed: {e}")
+        logging.error(f"❌ ERROR: Failed to generate response: {e}")
         return "⚠️ AI is currently unavailable. Please try again later."
 
 # ✅ Test chatbot in terminal
