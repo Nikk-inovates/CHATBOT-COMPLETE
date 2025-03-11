@@ -15,6 +15,20 @@ GEMINI_MODEL = "gemini-1.5-flash"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOCS_FOLDER = os.path.join(BASE_DIR, "data", "documents")  # Folder where PDFs are stored
 
+# ✅ Debugging: Check if API key is loaded
+if not GEMINI_API_KEY:
+    raise ValueError("❌ ERROR: GEMINI_API_KEY is missing! Add it in 'config.py' or Render Env Vars.")
+
+print(f"✅ GEMINI_API_KEY Loaded: {GEMINI_API_KEY[:5]}********")  # Hide full key for security
+
+# ✅ Debugging: Print document folder path
+print(f"📁 Checking folder: {DOCS_FOLDER}")
+
+# ✅ Ensure documents folder exists
+if not os.path.exists(DOCS_FOLDER):
+    logging.error(f"❌ ERROR: Documents folder not found: {DOCS_FOLDER}")
+    raise FileNotFoundError(f"❌ Documents folder missing: {DOCS_FOLDER}")
+
 def extract_text_from_pdf(pdf_path):
     """Extract text from a single PDF file."""
     extracted_text = []
@@ -33,15 +47,21 @@ def extract_text_from_pdf(pdf_path):
 
 def load_pdf_context():
     """Load text from the first available PDF in the documents folder."""
-    pdf_files = [f for f in os.listdir(DOCS_FOLDER) if f.endswith(".pdf")]
     
+    if not os.path.exists(DOCS_FOLDER):
+        logging.warning(f"⚠️ No 'documents' folder found at {DOCS_FOLDER}.")
+        return "⚠️ No documents available."
+
+    pdf_files = [f for f in os.listdir(DOCS_FOLDER) if f.endswith(".pdf")]
+
     if not pdf_files:
         logging.warning("⚠️ No PDF files found in the 'documents' folder.")
-        return None
+        return "⚠️ No documents available."
 
     # ✅ Select the first PDF file found
     pdf_path = os.path.join(DOCS_FOLDER, pdf_files[0])
     logging.info(f"📄 Extracting text from: {pdf_path}")
+
     return extract_text_from_pdf(pdf_path)
 
 def generate_response(user_query):
@@ -49,7 +69,10 @@ def generate_response(user_query):
     
     # ✅ Load the PDF text
     pdf_context = load_pdf_context()
-    
+
+    if not pdf_context or "⚠️" in pdf_context:
+        return "⚠️ No documents available for reference."
+
     # ✅ Construct prompt for Gemini AI
     prompt = f"""
     You are an AI assistant that answers questions based on the provided document.
