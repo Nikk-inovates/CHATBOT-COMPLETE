@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: chatbot-api
+    runtime: python
+    region: oregon  # Change if needed
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false  # Store this manually in Render's dashboard
+    plan: free  # Change to 'starter' if needed
