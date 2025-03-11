@@ -1,21 +1,23 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="styles.css"> <!-- Ensure this file exists -->
 </head>
 <body>
     <div id="chat-container">
-        <div id="chat-header">Chatbot</div>
+        <div id="chat-header">Chatbot 🤖</div> <!-- Header added for better UI -->
         <div id="chat-box"></div>
+        
         <div id="input-container">
-            <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off">
-            <button id="send-btn">➤</button>
+            <input type="text" id="user-input" placeholder="Type a message..." aria-label="User message">
+            <button id="send-btn">Send</button>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="script.js"></script> <!-- Ensure this file exists -->
 </body>
 </html>
