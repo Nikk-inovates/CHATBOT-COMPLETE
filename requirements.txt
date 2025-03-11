@@ -10,3 +10,9 @@ tqdm==4.66.1
 requests==2.31.0
 gunicorn==21.2.0
 python-dotenv==1.0.1
+psycopg2-binary==2.9.9
+googletrans==4.0.0-rc1
+indic-nlp-library==0.81
+spacy==3.7.2
+langdetect==1.0.9
+deep-translator==1.11.4
