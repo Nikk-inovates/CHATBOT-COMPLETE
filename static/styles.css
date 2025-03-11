@@ -1,7 +1,7 @@
 /* Global Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #343541;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,22 +13,24 @@ body {
 #chat-container {
     width: 400px;
     height: 600px;
-    background-color: #40414F;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #ffffff, #f2f7ff);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    border: 2px solid #e0e7ff;
 }
 
 /* Chat Header */
 #chat-header {
-    background-color: #202123;
+    background: linear-gradient(135deg, #a0c4ff, #bdb2ff);
     color: white;
     text-align: center;
     padding: 15px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
+    border-radius: 15px 15px 0 0;
 }
 
 /* Chat Box */
@@ -40,13 +42,14 @@ body {
     flex-direction: column;
     gap: 10px;
     scroll-behavior: smooth;
+    background-color: #ffffff;
 }
 
 /* Message Bubbles */
 .message {
     max-width: 80%;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 15px;
     word-wrap: break-word;
     font-size: 14px;
     line-height: 1.4;
@@ -54,55 +57,69 @@ body {
     animation: fadeIn 0.3s forwards ease-in-out;
 }
 
+/* User Message */
 .user-message {
     align-self: flex-end;
-    background-color: #0A84FF;
+    background-color: #ffafcc;
     color: white;
     border-radius: 15px 15px 0 15px;
     animation-delay: 0.1s;
+    box-shadow: 0 4px 8px rgba(255, 175, 204, 0.3);
 }
 
+/* Bot Message */
 .bot-message {
     align-self: flex-start;
-    background-color: #555;
-    color: white;
+    background-color: #caffbf;
+    color: #333;
     border-radius: 15px 15px 15px 0;
     animation-delay: 0.2s;
+    box-shadow: 0 4px 8px rgba(202, 255, 191, 0.3);
 }
 
 /* Input Container */
 #input-container {
     display: flex;
     padding: 10px;
-    background-color: #202123;
-    border-top: 1px solid #555;
+    background-color: #eef2ff;
+    border-top: 1px solid #d1d5ff;
 }
 
 #user-input {
     flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
+    padding: 12px;
+    border: 2px solid #a0c4ff;
+    border-radius: 8px;
     font-size: 16px;
-    background-color: #40414F;
-    color: white;
+    background-color: white;
+    color: #333;
     outline: none;
+    transition: 0.3s ease;
 }
 
+#user-input:focus {
+    border-color: #ffafcc;
+    box-shadow: 0 0 10px rgba(255, 175, 204, 0.3);
+}
+
+/* Send Button */
 #send-btn {
-    background-color: #0A84FF;
+    background: linear-gradient(135deg, #ffafcc, #ffb3c1);
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 12px 15px;
     margin-left: 10px;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
-    transition: background 0.2s ease-in-out;
+    transition: 0.3s ease-in-out;
+    box-shadow: 0 4px 8px rgba(255, 175, 204, 0.3);
 }
 
 #send-btn:hover {
-    background-color: #005FCC;
+    background: linear-gradient(135deg, #ffb3c1, #ffafcc);
+    box-shadow: 0 4px 12px rgba(255, 175, 204, 0.5);
+    transform: scale(1.05);
 }
 
 /* Fade In Animation */
